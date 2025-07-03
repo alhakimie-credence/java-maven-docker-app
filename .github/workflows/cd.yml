@@ -1,0 +1,90 @@
+name: Java Maven Docker CD
+
+on:
+  workflow_run:
+    workflows: ["Java Maven Docker CI"]
+    types:
+      - completed
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    
+    - name: Download artifacts from workflow
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: ci.yml
+        workflow_conclusion: success
+        name: java-maven-app
+        path: target/
+    
+    - name: List downloaded files
+      run: ls -la target/
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Extract version from pom.xml
+      run: |
+        VERSION=$(grep -m 1 "<version>" pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+        echo "APP_VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BUILD_DATE=$(date +'%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+    
+    - name: Build production Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: false
+        load: true
+        tags: |
+          java-maven-app:prod
+          java-maven-app:${{ env.APP_VERSION }}
+          java-maven-app:${{ env.APP_VERSION }}-${{ env.BUILD_DATE }}
+    
+    # Example for pushing to GitHub Container Registry
+    # Uncomment and adjust as needed
+    #- name: Login to GitHub Container Registry
+    #  uses: docker/login-action@v2
+    #  with:
+    #    registry: ghcr.io
+    #    username: ${{ github.actor }}
+    #    password: ${{ secrets.GITHUB_TOKEN }}
+    #
+    #- name: Tag and push image to GitHub Container Registry
+    #  run: |
+    #    docker tag java-maven-app:prod ghcr.io/alhakimie-credence/java-maven-app:latest
+    #    docker push ghcr.io/alhakimie-credence/java-maven-app:latest
+    
+    - name: Test production Docker image
+      run: |
+        docker run -d -p 9080:8080 --name prod-test java-maven-app:prod
+        sleep 10
+        docker ps | grep prod-test
+        if [ $? -ne 0 ]; then
+          echo "Production container failed to start!"
+          docker logs prod-test
+          exit 1
+        fi
+        docker rm -f prod-test
+
+    # Example deployment to a server
+    # Replace with your actual deployment steps
+    - name: Deploy application
+      run: |
+        echo "Deploying application to production environment"
+        echo "This is where you would add commands to deploy to your server or cloud provider"
+        echo "Using version: ${{ env.APP_VERSION }}-${{ env.BUILD_DATE }}"
+        # Example: SSH to server and update container
+        # ssh user@your-server "docker pull your-registry/java-maven-app:${{ env.APP_VERSION }}-${{ env.BUILD_DATE }} && docker-compose up -d"
