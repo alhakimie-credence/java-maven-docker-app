@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  java-dev:
+    build: .
+    container_name: java-maven-container
+    volumes:
+      - .:/workspace
+      - maven-repo:/home/developer/.m2
+    working_dir: /workspace
+    ports:
+      - "9080:8080"
+      - "5005:5005"  # Debug port
+    stdin_open: true
+    tty: true
+    user: developer
+
+volumes:
+  maven-repo:
+    driver: local

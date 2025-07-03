@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Maven: Clean",
+            "type": "shell",
+            "command": "mvn clean",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Maven: Compile",
+            "type": "shell",
+            "command": "mvn compile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Maven: Test",
+            "type": "shell",
+            "command": "mvn test",
+            "group": "test"
+        },
+        {
+            "label": "Maven: Package",
+            "type": "shell",
+            "command": "mvn package",
+            "group": "build"
+        },
+        {
+            "label": "Run Application",
+            "type": "shell",
+            "command": "mvn exec:java -Dexec.mainClass=\"com.example.App\"",
+            "group": "build"
+        }
+    ]
+}

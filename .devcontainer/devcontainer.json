@@ -1,0 +1,45 @@
+{
+    "name": "Java 1.8 Maven Development",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "java-dev",
+    "workspaceFolder": "/workspace",
+    "shutdownAction": "stopCompose",
+    
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "java.home": "/usr/lib/jvm/java-8-openjdk-amd64",
+                "maven.executable.path": "/usr/bin/mvn",
+                "java.configuration.runtimes": [
+                    {
+                        "name": "JavaSE-1.8",
+                        "path": "/usr/lib/jvm/java-8-openjdk-amd64"
+                    }
+                ],
+                "java.debug.settings.hotCodeReplace": "auto",
+                "java.debug.settings.enableRunDebugCodeLens": true,
+                "java.configuration.updateBuildConfiguration": "automatic",
+                "terminal.integrated.defaultProfile.linux": "bash"
+            },
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-maven",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    
+    "forwardPorts": [9080, 5005],
+    "portsAttributes": {
+        "9080": {
+            "label": "Java Application",
+            "onAutoForward": "notify"
+        },
+        "5005": {
+            "label": "Java Debug Port"
+        }
+    },
+    
+    "postCreateCommand": "java -version && mvn -version",
+    "remoteUser": "developer"
+}
