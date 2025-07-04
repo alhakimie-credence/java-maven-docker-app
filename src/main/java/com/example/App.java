@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
@@ -33,14 +34,48 @@ public class App {
             System.err.println("Error creating JSON: " + e.getMessage());
         }
         
-        // Call our new test method
-        testMethod();
+        // HTTP Request functionality
+        executeHttpRequestDemo();
         
         System.out.println("=== Application Started Successfully ===");
     }
+    
+    /**
+     * Demonstrates HTTP GET request functionality
+     */
+    public static void executeHttpRequestDemo() {
+        System.out.println("\n=== HTTP Request Demo ===");
+        HttpRequestClient httpClient = new HttpRequestClient();
+        
+        try {
+            System.out.println("Using properties file for HTTP request configuration");
+            String response = httpClient.sendGetRequestWithPropertiesFile("http-config.properties");
+            
+            System.out.println("\n=== HTTP Response ===");
+            System.out.println(response);
+            
+            // Parse comma-separated response
+            if (response.length() > 0 && response.contains(",")) {
+                String strResponse = response;
+                String[] cpaResponse = strResponse.split(",");
 
-    public static void testMethod() {
-        System.out.println("Testing IntelliSense");
+                String msisdn = null, msgID = null, statusCode = null;
+
+                if (cpaResponse.length > 2) {
+                    msisdn = cpaResponse[0];
+                    msgID = cpaResponse[1];
+                    statusCode = cpaResponse[2];
+                    
+                    System.out.println("\n=== Parsed Response ===");
+                    System.out.println("MSISDN: " + msisdn);
+                    System.out.println("Message ID: " + msgID);
+                    System.out.println("Status Code: " + statusCode);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error executing HTTP request: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 

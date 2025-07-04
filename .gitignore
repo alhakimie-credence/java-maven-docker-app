@@ -8,3 +8,6 @@ target/
 *.war
 *.ear
 .DS_Store
+
+# Configuration files with sensitive data
+src/main/resources/http-config.properties
